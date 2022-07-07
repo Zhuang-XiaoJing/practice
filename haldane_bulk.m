@@ -1,14 +1,16 @@
 % --- Haldane bulk ---
 clc;clear;
+M = 0.5;
+phi = -pi/2;
 Kx = linspace(-pi,pi,101);
 Ky = linspace(-pi,pi,101);
-[~,band_num] = size(haldaneBulk(0,0));
+[~,band_num] = size(haldaneBulk(0,0,M,phi));
 band = zeros(length(Kx),length(Ky),band_num);
 for ii = 1:length(Kx)
     kx = Kx(ii);
     for jj = 1:length(Ky)
         ky = Ky(jj);
-        [V,D] = eig(haldaneBulk(kx,ky));
+        [V,D] = eig(haldaneBulk(kx,ky,M,phi));
         band(ii,jj,:) = sort(diag(D));
     end
 end
@@ -122,18 +124,24 @@ b1 = [-sqrt(3)/2,3/2];
 b2 = [-sqrt(3)/2,-3/2];
 b3 = [sqrt(3),0];
 k = [kx,ky];
-s0 = eye(2); sx = [0,1;1,0]; sy = [0,-1j;1j,0]; sz = [1,0;0,-1];
-% M = 0.5;
+% s0 = eye(2); sx = [0,1;1,0]; sy = [0,-1j;1j,0]; sz = [1,0;0,-1];
+% % M = 0.5;
 t1 = -1;
 t2 = -1;
-% phi = -pi/2;
-h0 = 2*t2*cos(phi)*(cos(dot(k,b1))+cos(dot(k,b2))+cos(dot(k,b3)));
-hx = t1*(1 + cos(dot(k,b1)) + cos(dot(k,b2)));
-hy = t1*(sin(dot(k,b1)) - sin(dot(k,b2)));
-hz = M - 2*t2*sin(phi)*(sin(dot(k,b1)) + sin(dot(k,b2)) + sin(dot(k,b3)));
-h = h0*s0 + hx*sx + hy*sy + hz*sz;
+% % phi = -pi/2;
+% h0 = 2*t2*cos(phi)*(cos(dot(k,b1))+cos(dot(k,b2))+cos(dot(k,b3)));
+% hx = t1*(1 + cos(dot(k,b1)) + cos(dot(k,b2)));
+% hy = t1*(sin(dot(k,b1)) - sin(dot(k,b2)));
+% hz = M - 2*t2*sin(phi)*(sin(dot(k,b1)) + sin(dot(k,b2)) + sin(dot(k,b3)));
+% h = h0*s0 + hx*sx + hy*sy + hz*sz;
+h00 = [M,t1;t1,-M];
+h01 = exp(1j*dot(k,b1))*[t2*exp(-1j*phi),t1;0,t2*exp(1j*phi)];
+h02 = exp(1j*dot(k,b2))*[t2*exp(-1j*phi),0;t1,t2*exp(1j*phi)];
+h03 = exp(1j*dot(k,b3))*[t2*exp(-1j*phi),0;0,t2*exp(1j*phi)];
+h = h00 + h01 + h01' + h02 + h02' + h03 + h03';
 
 end
+
 % ----- Get occupied band ----
 function occu = getvec(H)
 [V,D] = eig(H);
