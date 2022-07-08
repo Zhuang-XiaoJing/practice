@@ -43,6 +43,10 @@ for ind = 1:band_num
     hold on
 end
 %%
+% ---- Bulk winding ----
+bulkwinding(0-.5,pi/2)
+
+%%
 % ---- phase diagram ----
 clc;clear;
 num = 50;
@@ -120,6 +124,32 @@ h = h0*s0 + hx*sx + hy*sy + hz*sz;
 
 end
 
+% ----- Bulk winding -------
+function bulkwinding(M,phi)
+
+t1 = 1;
+t2 = 1;
+t3 = 2;
+Kx = linspace(-pi,pi,51);
+Ky = linspace(-pi,pi,51);
+[KX,KY] = meshgrid(Kx,Ky);
+hx = t1*(1+cos(-sqrt(3)/2*KX+3/2*KY)+cos(-sqrt(3)/2*KX-3/2*KY)) +...
+    t3*(2*cos(-sqrt(3)*KX)+cos(3*KY));
+hy = t1*(sin(-sqrt(3)/2*KX+3/2*KY)-sin(-sqrt(3)/2*KX-3/2*KY)) +...
+    t3*sin(3*KY);
+hz = M - ...
+    2*t2*sin(phi)*(sin(-sqrt(3)/2*KX+3/2*KY)+sin(-sqrt(3)/2*KX-3/2*KY)+sin(sqrt(3)*KX));
+h0 = 2*t2*cos(phi)*(cos(-sqrt(3)/2*KX+3/2*KY)+cos(-sqrt(3)/2*KX-3/2*KY)+cos(sqrt(3)*KX));
+figure;
+s = surf(hx,hy,hz+h0,...
+    'FaceAlpha','flat',...
+    'FaceColor','blue');
+alpha(s,.2);
+hold on 
+scatter3(0,0,0,'r','filled');
+axis equal
+end
+
 % ----- Get occupied band ----
 function occu = getvec(H)
 [V,D] = eig(H);
@@ -130,7 +160,7 @@ end
 % ------ strip hamiltonian -------
 function H = Hamiltonian(kx,Ncelly)
 
-n = 4; % 元胞中原子个数
+n = 4; % site # in a primitive cell
 M = 0; t1 = 1; t2 = 1/3; phi = pi/2; t3 = 0;
 s0 = eye(2);
 sz = [1,0;0,-1];
